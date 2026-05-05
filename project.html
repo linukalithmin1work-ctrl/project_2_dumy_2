@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediVault Pharmacy</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --surface: #fff;
+            --border: #e2e8f0;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #64748b;
+            --faint: #f8fafc;
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --primary-bg: #f0f9ff;
+            --green: #10b981;
+            --green-bg: #f0fdf4;
+            --red: #ef4444;
+            --red-bg: #fef2f2;
+            --amber: #f59e0b;
+            --amber-bg: #fffbeb;
+            --violet: #8b5cf6;
+
+            /* dark (staff) */
+            --d-bg: #080c14;
+            --d-surface: #0e1520;
+            --d-surface2: #141d2e;
+            --d-border: rgba(255, 255, 255, .07);
+            --d-border-hi: rgba(255, 255, 255, .14);
+            --d-text: #e8edf5;
+            --d-muted: #5a6882;
+            --d-faint: #1e293b;
+            --d-blue: #4fa3f7;
+            --d-green: #22d3a6;
+            --d-pink: #e879a0;
+            --d-amber: #f5a623;
+            --d-orange: #fb923c;
+            --d-red: #f87171;
+            --d-violet: #a78bfa;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, .15);
+            border-radius: 4px;
+        }
+
+        /* ANIMATIONS */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0)
+            }
+
+            20% {
+                transform: translateX(-10px)
+            }
+
+            60% {
+                transform: translateX(10px)
+            }
+        }
+
+        @keyframes slideRight {
+            from {
+                transform: translateX(-100%)
+            }
+
+            to {
+                transform: none
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .5
+            }
+        }
+
+        .fade-up {
+            animation: fadeUp .35s ease both;
+        }
+
+        .fade-in {
+            animation: fadeIn .25s ease both;
+        }
+
+        .shake {
+            animation: shake .4s ease;
+        }
+
+        /* PUBLIC SIDE STYLES */
+        .pub-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 66px;
+            z-index: 100;
+            background: rgba(255, 255, 255, .95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 0 0 0;
+        }
+
+        .pub-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 260px;
+            z-index: 200;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transform: translateX(-100%);
+            transition: transform .3s ease;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, .08);
+        }
+
+        .pub-sidebar.open {
+            transform: none;
+        }
+
+        .pub-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .35);
+            z-index: 199;
+            animation: fadeIn .2s ease;
+            backdrop-filter: blur(2px);
+        }
+
+        .pub-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            transition: all .15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .pub-nav-item:hover {
+            background: var(--bg2);
+            color: var(--text);
+        }
+
+        .pub-nav-item.active {
+            background: var(--primary-bg);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .pub-nav-item.staff-btn {
+            background: var(--d-bg);
+            color: var(--d-text);
+            margin-top: auto;
+        }
+
+        .pub-nav-item.staff-btn:hover {
+            background: #111827;
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .card-dark {
+            background: var(--d-surface);
+            border: 1px solid var(--d-border);
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        /* BUTTONS PUBLIC */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+            white-space: nowrap;
+        }
+
+        .btn:hover:not(:disabled) {
+            opacity: .88;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: scale(.97);
+        }
+
+        .btn:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-ghost {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .btn-dark {
+            background: var(--d-surface2);
+            border: 1px solid var(--d-border-hi);
+            color: var(--d-text);
+        }
+
+        .btn-sm {
+            padding: 7px 14px;
+            font-size: 12.5px;
+            border-radius: 8px;
+        }
+
+        .btn-success-d {
+            background: rgba(34, 211, 166, .12);
+            border: 1px solid rgba(34, 211, 166, .3);
+            color: var(--d-green);
+        }
+
+        .btn-danger-d {
+            background: rgba(248, 113, 113, .12);
+            border: 1px solid rgba(248, 113, 113, .3);
+            color: var(--d-red);
+        }
+
+        /* INPUTS */
+        .inp {
+            background: var(--bg2);
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            padding: 10px 14px;
+            outline: none;
+            width: 100%;
+            transition: border-color .2s;
+        }
+
+        .inp:focus {
+            border-color: var(--primary);
+        }
+
+        .inp::placeholder {
+            color: var(--muted);
+        }
+
+        .inp-dark {
+            background: var(--d-faint);
+            border: 1px solid var(--d-border-hi);
+            border-radius: 8px;
+            color: var(--d-text);
+            font-family: inherit;
+            font-size: 13.5px;
+            padding: 9px 13px;
+            outline: none;
+            width: 100%;
+            transition: border-color .2s;
+        }
+
+        .inp-dark:focus {
+            border-color: rgba(255, 255, 255, .3);
+        }
+
+        .inp-dark::placeholder {
+            color: var(--d-muted);
+        }
+
+        select.inp,
+        select.inp-dark {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        label.lbl {
+            color: var(--muted);
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        label.lbl-dark {
+            color: var(--d-muted);
+            font-size: 11.5px;
+            font-weight: 500;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* BADGE */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 9px;
+            border-radius: 12px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        /* TABLE */
+        .tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .tbl th {
+            color: var(--muted);
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            padding: 0 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tbl td {
+            padding: 11px 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, .04);
+            vertical-align: middle;
+        }
+
+        .tbl tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tbl-dark th {
+            color: var(--d-muted);
+            border-bottom-color: var(--d-border);
+        }
+
+        .tbl-dark td {
+            border-bottom-color: rgba(255, 255, 255, .04);
+        }
+
+        /* MODAL */
+        .modal-bg {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            backdrop-filter: blur(6px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn .2s ease;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px;
+            width: min(560px, 100%);
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: fadeUp .25s ease;
+        }
+
+        .modal-box-dark {
+            background: var(--d-surface);
+            border: 1px solid var(--d-border-hi);
+            border-radius: 18px;
+            padding: 28px;
+            width: min(560px, 100%);
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: fadeUp .25s ease;
+        }
+
+        /* STAFF INTERNAL */
+        .nav-item-d {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            width: 100%;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--d-muted);
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 2px;
+            transition: all .15s;
+            text-align: left;
+        }
+
+        .nav-item-d:hover {
+            color: var(--d-text);
+            background: var(--d-faint);
+        }
+
+        .nav-item-d.active {
+            color: var(--d-text);
+            background: var(--d-faint);
+            font-weight: 600;
+        }
+
+        .stat-card-d {
+            background: var(--d-surface);
+            border: 1px solid var(--d-border);
+            border-radius: 14px;
+            padding: 20px 22px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color .2s;
+        }
+
+        .stat-card-d:hover {
+            border-color: var(--d-border-hi);
+        }
+
+        /* PRESCRIPTION SCAN */
+        .scan-zone {
+            border: 2px dashed var(--border2);
+            border-radius: 16px;
+            padding: 48px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s;
+            background: var(--faint);
+        }
+
+        .scan-zone:hover,
+        .scan-zone.drag {
+            border-color: var(--primary);
+            background: var(--primary-bg);
+        }
+
+        /* MEDICINE GRID CARDS */
+        .med-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            transition: all .2s;
+            cursor: default;
+        }
+
+        .med-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(14, 165, 233, .08);
+        }
+
+        /* HERO */
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #0c2340 40%, #0f3460 100%);
+            color: #fff;
+            padding: 80px 40px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 60% at 50% -10%, rgba(14, 165, 233, .25), transparent);
+        }
+
+        /* ORDER CART */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .qty-btn-pub {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            border: 1.5px solid var(--border2);
+            background: var(--bg2);
+            color: var(--text);
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .1s;
+        }
+
+        .qty-btn-pub:hover {
+            background: var(--border);
+            border-color: var(--primary);
+        }
+
+        /* PILL */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 11px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        /* SECTIONS */
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+
+        .section-sub {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 28px;
+            margin-top: -12px;
+        }
+
+        /* RESPONSIVE GRID */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .grid-auto {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        @media(max-width:700px) {
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 60px 20px 40px;
+            }
+        }
+
+        /* STEP INDICATOR */
+        .step-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* TYPING EFFECT on scan result */
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0
+            }
+        }
+
+        .cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // ═══════════════════════════ DATA ═══════════════════════════
+        const USERS = [
+            { id: 1, name: "Kasun Perera", role: "owner", pin: "1111", avatar: "KP" },
+            { id: 2, name: "Nimal Silva", role: "stock", pin: "2222", avatar: "NS" },
+            { id: 3, name: "Amara Fernando", role: "counter", pin: "3333", avatar: "AF" },
+            { id: 4, name: "Dinesh Ratne", role: "finance", pin: "4444", avatar: "DR" },
+            { id: 5, name: "Saman Jayawardena", role: "stock", pin: "5555", avatar: "SJ" },
+        ];
+        const ROLE_META = {
+            owner: { label: "Owner", color: "#f5a623", bg: "rgba(245,166,35,.12)", icon: "👑" },
+            finance: { label: "Finance", color: "#22d3a6", bg: "rgba(34,211,166,.12)", icon: "💹" },
+            stock: { label: "Stock", color: "#4fa3f7", bg: "rgba(79,163,247,.12)", icon: "📦" },
+            counter: { label: "Counter", color: "#e879a0", bg: "rgba(232,121,160,.12)", icon: "🏥" },
+        };
+        const MEDICINES = [
+            { id: 1, name: "Paracetamol 500mg", category: "Analgesic", stock: 500, minStock: 100, price: 2.50, costPrice: 1.20, expiry: "2026-08-01", supplier: "PharmaCo", unit: "tablets", description: "Pain relief and fever reducer. Safe for adults and children.", image: "💊" },
+            { id: 2, name: "Amoxicillin 250mg", category: "Antibiotic", stock: 120, minStock: 50, price: 15.00, costPrice: 8.00, expiry: "2025-12-01", supplier: "MediSupply", unit: "capsules", description: "Broad-spectrum antibiotic. Requires prescription.", image: "💊" },
+            { id: 3, name: "Omeprazole 20mg", category: "Antacid", stock: 30, minStock: 50, price: 12.00, costPrice: 6.50, expiry: "2026-03-15", supplier: "PharmaCo", unit: "capsules", description: "Treats acid reflux and stomach ulcers.", image: "💊" },
+            { id: 4, name: "Metformin 500mg", category: "Antidiabetic", stock: 200, minStock: 80, price: 8.00, costPrice: 3.50, expiry: "2025-06-01", supplier: "LifeMed", unit: "tablets", description: "Controls blood sugar in Type 2 diabetes.", image: "💊" },
+            { id: 5, name: "Atorvastatin 10mg", category: "Cardiovascular", stock: 80, minStock: 60, price: 22.00, costPrice: 11.00, expiry: "2027-01-10", supplier: "CardioPharm", unit: "tablets", description: "Lowers cholesterol and reduces heart disease risk.", image: "💊" },
+            { id: 6, name: "Cetirizine 10mg", category: "Antihistamine", stock: 15, minStock: 30, price: 5.00, costPrice: 2.20, expiry: "2026-09-20", supplier: "AllerMed", unit: "tablets", description: "Relieves allergy symptoms, hay fever, and hives.", image: "💊" },
+            { id: 7, name: "Ibuprofen 400mg", category: "Anti-inflammatory", stock: 350, minStock: 100, price: 4.00, costPrice: 1.80, expiry: "2026-11-30", supplier: "PharmaCo", unit: "tablets", description: "Reduces inflammation, pain, and fever.", image: "💊" },
+            { id: 8, name: "Salbutamol Inhaler", category: "Bronchodilator", stock: 25, minStock: 20, price: 45.00, costPrice: 22.00, expiry: "2025-09-15", supplier: "RespiMed", unit: "inhaler", description: "Relieves bronchospasm in asthma and COPD.", image: "🫁" },
+            { id: 9, name: "Vitamin C 500mg", category: "Supplement", stock: 400, minStock: 80, price: 3.50, costPrice: 1.50, expiry: "2027-06-01", supplier: "VitaPlus", unit: "tablets", description: "Immune support and antioxidant supplement.", image: "🍊" },
+            { id: 10, name: "Zinc 25mg", category: "Supplement", stock: 300, minStock: 60, price: 4.50, costPrice: 1.80, expiry: "2027-03-15", supplier: "VitaPlus", unit: "tablets", description: "Supports immune function and wound healing.", image: "💛" },
+        ];
+        const INITIAL_SALES = [
+            { id: 1, date: "2026-05-01", items: [{ name: "Paracetamol 500mg", qty: 10, price: 2.50 }, { name: "Ibuprofen 400mg", qty: 5, price: 4.00 }], total: 45.00, cashier: "Amara Fernando" },
+            { id: 2, date: "2026-05-02", items: [{ name: "Amoxicillin 250mg", qty: 3, price: 15.00 }], total: 45.00, cashier: "Amara Fernando" },
+            { id: 3, date: "2026-05-03", items: [{ name: "Metformin 500mg", qty: 20, price: 8.00 }, { name: "Atorvastatin 10mg", qty: 10, price: 22.00 }], total: 380.00, cashier: "Amara Fernando" },
+            { id: 4, date: "2026-05-04", items: [{ name: "Cetirizine 10mg", qty: 5, price: 5.00 }, { name: "Paracetamol 500mg", qty: 20, price: 2.50 }], total: 75.00, cashier: "Amara Fernando" },
+        ];
+        const INITIAL_EMPLOYEES = [
+            { id: 1, name: "Nimal Silva", role: "stock", salary: 45000, paid: true },
+            { id: 2, name: "Amara Fernando", role: "counter", salary: 40000, paid: false },
+            { id: 3, name: "Dinesh Ratne", role: "finance", salary: 55000, paid: true },
+            { id: 4, name: "Saman Jayawardena", role: "stock", salary: 42000, paid: false },
+        ];
+        const INITIAL_REQUESTS = [
+            { id: 1, medicine: "Omeprazole 20mg", qty: 200, cost: 1300, status: "pending", date: "2026-05-02", requester: "Nimal Silva" },
+            { id: 2, medicine: "Cetirizine 10mg", qty: 100, cost: 220, status: "pending", date: "2026-05-03", requester: "Saman Jayawardena" },
+            { id: 3, medicine: "Metformin 500mg", qty: 300, cost: 1050, status: "approved", date: "2026-05-01", requester: "Nimal Silva" },
+        ];
+        const PUBLIC_ORDERS_INIT = [
+            { id: 1, customer: "Saman Perera", phone: "0712345678", items: [{ name: "Paracetamol 500mg", qty: 20, price: 2.50 }], total: 50, status: "ready", date: "2026-05-03", note: "" },
+            { id: 2, customer: "Kamani Silva", phone: "0778889900", items: [{ name: "Vitamin C 500mg", qty: 30, price: 3.50 }], total: 105, status: "pending", date: "2026-05-04", note: "Call before pickup" },
+        ];
+        let globalState = {
+            medicines: [...MEDICINES],
+            sales: [...INITIAL_SALES],
+            employees: [...INITIAL_EMPLOYEES],
+            stockRequests: [...INITIAL_REQUESTS],
+            publicOrders: [...PUBLIC_ORDERS_INIT],
+            billIdCounter: 5, medIdCounter: 11, orderIdCounter: 3,
+        };
+
+        // ═══════════════════════════ HELPERS ═══════════════════════════
+        const today = () => new Date().toISOString().split("T")[0];
+        const daysLeft = d => Math.ceil((new Date(d) - new Date()) / 86400000);
+        const fmt = n => "Rs. " + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+        // ═══════════════════════════ ATOMS ═══════════════════════════
+        function Badge({ color, bg, children }) {
+            return <span className="badge" style={{ background: bg || `${color}22`, color, border: `1px solid ${color}44` }}>{children}</span>;
+        }
+        function Modal({ title, onClose, children, dark, width = 560 }) {
+            return (
+                <div className="modal-bg" onClick={e => e.target === e.currentTarget && onClose()}>
+                    <div className={dark ? "modal-box-dark" : "modal-box"} style={{ width: `min(${width}px,100%)` }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+                            <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 17, fontWeight: 700, color: dark ? "var(--d-text)" : "var(--text)" }}>{title}</div>
+                            <button onClick={onClose} style={{ background: "none", border: "none", color: dark ? "var(--d-muted)" : "var(--muted)", fontSize: 24, cursor: "pointer", lineHeight: 1 }}>×</button>
+                        </div>
+                        {children}
+                    </div>
+                </div>
+            );
+        }
+        function StatCardD({ icon, label, value, color, sub }) {
+            return (
+                <div className="stat-card-d fade-up">
+                    <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at top right,${color}08,transparent 70%)`, borderRadius: "inherit", pointerEvents: "none" }} />
+                    <div style={{ fontSize: 20, marginBottom: 14 }}>{icon}</div>
+                    <div style={{ fontSize: 11, color: "var(--d-muted)", fontWeight: 500, letterSpacing: ".04em", textTransform: "uppercase", marginBottom: 6 }}>{label}</div>
+                    <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 700, color }}>{value}</div>
+                    {sub && <div style={{ fontSize: 11, color: "var(--d-muted)", marginTop: 4 }}>{sub}</div>}
+                </div>
+            );
+        }
+
+        // ═══════════════════════════ PRESCRIPTION SCANNER ═══════════════════════════
+        function PrescriptionScanner({ medicines, onAddToCart }) {
+            const [file, setFile] = useState(null);
+            const [preview, setPreview] = useState(null);
+            const [scanning, setScanning] = useState(false);
+            const [result, setResult] = useState(null);
+            const [drag, setDrag] = useState(false);
+            const fileRef = useRef();
+
+            const handleFile = f => {
+                if (!f) return;
+                setFile(f); setResult(null);
+                const r = new FileReader();
+                r.onload = e => setPreview(e.target.result);
+                r.readAsDataURL(f);
+            };
+
+            // Simulate AI prescription reading
+            const scanPrescription = () => {
+                setScanning(true); setResult(null);
+                setTimeout(() => {
+                    // Randomly pick 2-3 medicines from our stock to simulate OCR detection
+                    const detected = medicines
+                        .filter(m => m.stock > 0)
+                        .sort(() => Math.random() - .5)
+                        .slice(0, Math.floor(Math.random() * 2) + 2)
+                        .map(m => ({ ...m, prescribedQty: Math.floor(Math.random() * 20) + 5, doctorNote: "Take as directed by physician" }));
+                    setResult({
+                        patientName: "Specimen Patient",
+                        doctorName: "Dr. K. Wijesekara",
+                        date: today(),
+                        medicines: detected,
+                    });
+                    setScanning(false);
+                }, 2500);
+            };
+
+            const addAll = () => {
+                result.medicines.forEach(m => onAddToCart(m, m.prescribedQty));
+                setResult(null); setFile(null); setPreview(null);
+            };
+
+            return (
+                <div>
+                    <div className="section-title">📋 Prescription Scanner</div>
+                    <p className="section-sub">Upload your doctor's prescription and we'll identify the medicines automatically</p>
+
+                    {!preview ? (
+                        <div
+                            className={`scan-zone${drag ? " drag" : ""}`}
+                            onDragOver={e => { e.preventDefault(); setDrag(true); }}
+                            onDragLeave={() => setDrag(false)}
+                            onDrop={e => { e.preventDefault(); setDrag(false); handleFile(e.dataTransfer.files[0]); }}
+                            onClick={() => fileRef.current.click()}
+                        >
+                            <div style={{ fontSize: 52, marginBottom: 14 }}>📄</div>
+                            <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 17, fontWeight: 700, marginBottom: 8 }}>Drop prescription here</div>
+                            <div style={{ color: "var(--muted)", fontSize: 13, marginBottom: 20 }}>or click to browse — JPG, PNG, PDF supported</div>
+                            <button className="btn btn-primary" onClick={e => { e.stopPropagation(); fileRef.current.click(); }}>📁 Choose File</button>
+                            <input ref={fileRef} type="file" accept="image/*,.pdf" style={{ display: "none" }} onChange={e => handleFile(e.target.files[0])} />
+                        </div>
+                    ) : (
+                        <div className="card fade-in" style={{ marginBottom: 20 }}>
+                            <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flexWrap: "wrap" }}>
+                                <div style={{ flexShrink: 0 }}>
+                                    <img src={preview} alt="Prescription" style={{ width: 180, height: 220, objectFit: "cover", borderRadius: 10, border: "1px solid var(--border)" }} />
+                                    <div style={{ fontSize: 11, color: "var(--muted)", textAlign: "center", marginTop: 6 }}>{file?.name}</div>
+                                </div>
+                                <div style={{ flex: 1, minWidth: 200 }}>
+                                    {!result && !scanning && (
+                                        <>
+                                            <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Prescription uploaded</div>
+                                            <div style={{ color: "var(--muted)", fontSize: 13, marginBottom: 20 }}>Click scan to detect medicines using AI</div>
+                                            <div style={{ display: "flex", gap: 10 }}>
+                                                <button className="btn btn-primary" onClick={scanPrescription}>🔍 Scan Prescription</button>
+                                                <button className="btn btn-ghost" onClick={() => { setFile(null); setPreview(null); }}>Remove</button>
+                                            </div>
+                                        </>
+                                    )}
+                                    {scanning && (
+                                        <div style={{ padding: "20px 0" }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                                                <div style={{ width: 20, height: 20, border: "2px solid var(--primary)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+                                                <span style={{ fontWeight: 600 }}>Scanning prescription…</span>
+                                            </div>
+                                            {["Reading handwriting…", "Identifying medicines…", "Checking dosages…", "Matching stock…"].map((s, i) => (
+                                                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 13, color: "var(--muted)", animationDelay: `${i * 0.5}s` }}>
+                                                    <span style={{ animation: `pulse 1s ${i * 0.3}s infinite` }}>⏳</span> {s}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {result && (
+                                        <div className="fade-up">
+                                            <div style={{ background: "var(--green-bg)", border: "1px solid rgba(16,185,129,.25)", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 13 }}>
+                                                ✅ <strong>Scan complete!</strong> Found {result.medicines.length} medicines
+                                            </div>
+                                            <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 12 }}>
+                                                <strong>Patient:</strong> {result.patientName} &nbsp;·&nbsp; <strong>Doctor:</strong> {result.doctorName} &nbsp;·&nbsp; <strong>Date:</strong> {result.date}
+                                            </div>
+                                            <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden", marginBottom: 14 }}>
+                                                {result.medicines.map((m, i) => (
+                                                    <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderBottom: i < result.medicines.length - 1 ? "1px solid var(--border)" : "none" }}>
+                                                        <div>
+                                                            <div style={{ fontWeight: 600, fontSize: 13 }}>{m.name}</div>
+                                                            <div style={{ color: "var(--muted)", fontSize: 11 }}>Qty: {m.prescribedQty} {m.unit}</div>
+                                                        </div>
+                                                        <div style={{ textAlign: "right" }}>
+                                                            <div style={{ color: "var(--primary)", fontWeight: 700 }}>{fmt(m.price * m.prescribedQty)}</div>
+                                                            <div style={{ fontSize: 11, color: m.stock >= m.prescribedQty ? "var(--green)" : "var(--red)" }}>
+                                                                {m.stock >= m.prescribedQty ? "In stock" : "Low stock"}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div style={{ display: "flex", gap: 10 }}>
+                                                <button className="btn btn-primary" onClick={addAll}>🛒 Add All to Cart</button>
+                                                <button className="btn btn-ghost" onClick={() => { setFile(null); setPreview(null); setResult(null); }}>Scan Another</button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Manual medicine lookup */}
+                    <div style={{ marginTop: 28 }}>
+                        <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Or search manually</div>
+                        <ManualMedSearch medicines={medicines} onAdd={onAddToCart} />
+                    </div>
+                </div>
+            );
+        }
+
+        function ManualMedSearch({ medicines, onAdd }) {
+            const [q, setQ] = useState("");
+            const res = q.length > 1 ? medicines.filter(m => m.name.toLowerCase().includes(q.toLowerCase()) && m.stock > 0) : [];
+            return (
+                <div style={{ position: "relative", maxWidth: 480 }}>
+                    <input className="inp" value={q} onChange={e => setQ(e.target.value)} placeholder="🔍  Search medicine name…" />
+                    {res.length > 0 && (
+                        <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, zIndex: 50, maxHeight: 240, overflowY: "auto", boxShadow: "0 16px 40px rgba(0,0,0,.12)" }}>
+                            {res.map(m => (
+                                <div key={m.id} style={{ padding: "11px 14px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)" }}
+                                    onClick={() => { onAdd(m, 1); setQ(""); }}>
+                                    <div>
+                                        <div style={{ fontSize: 13.5, fontWeight: 500 }}>{m.name}</div>
+                                        <div style={{ color: "var(--muted)", fontSize: 11 }}>{m.category} · {m.stock} in stock</div>
+                                    </div>
+                                    <div style={{ color: "var(--primary)", fontWeight: 700 }}>{fmt(m.price)}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ═══════════════════════════ PUBLIC ORDER PAGE ═══════════════════════════
+        function PublicOrderPage({ medicines, onPlaceOrder }) {
+            const [page, setPage] = useState("browse"); // browse | prescription | cart | confirm | done
+            const [cart, setCart] = useState([]);
+            const [search, setSearch] = useState("");
+            const [category, setCategory] = useState("All");
+            const [form, setForm] = useState({ name: "", phone: "", address: "", note: "" });
+            const [orderId, setOrderId] = useState(null);
+
+            const categories = ["All", ...[...new Set(medicines.map(m => m.category))]];
+            const filtered = medicines.filter(m => {
+                const qs = search.toLowerCase();
+                const catOk = category === "All" || m.category === category;
+                const searchOk = !search || m.name.toLowerCase().includes(qs) || m.category.toLowerCase().includes(qs);
+                return catOk && searchOk && m.stock > 0;
+            });
+
+            const addToCart = (med, qty = 1) => {
+                setCart(c => {
+                    const ex = c.find(x => x.id === med.id);
+                    if (ex) return c.map(x => x.id === med.id ? { ...x, qty: Math.min(x.qty + qty, med.stock) } : x);
+                    return [...c, { ...med, qty: Math.min(qty, med.stock) }];
+                });
+            };
+            const updateQty = (id, qty) => {
+                if (qty <= 0) setCart(c => c.filter(x => x.id !== id));
+                else setCart(c => c.map(x => x.id === id ? { ...x, qty } : x));
+            };
+            const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
+
+            const placeOrder = () => {
+                if (!form.name || !form.phone) return;
+                const id = onPlaceOrder({ ...form, items: cart.map(x => ({ name: x.name, qty: x.qty, price: x.price })), total });
+                setOrderId(id);
+                setPage("done");
+                setCart([]);
+            };
+
+            return (
+                <div>
+                    {/* Sub nav */}
+                    <div style={{ display: "flex", gap: 6, marginBottom: 28, flexWrap: "wrap", alignItems: "center" }}>
+                        {[{ id: "browse", label: "💊 Browse Medicines" }, { id: "prescription", label: "📋 Prescription Scan" }, { id: "cart", label: `🛒 Cart (${cart.length})` }].map(p => (
+                            <button key={p.id} className="btn btn-sm" style={{
+                                background: page === p.id ? "var(--primary)" : "var(--bg2)",
+                                color: page === p.id ? "#fff" : "var(--muted)",
+                                border: page === p.id ? "none" : "1px solid var(--border)",
+                            }} onClick={() => setPage(p.id)}>{p.label}</button>
+                        ))}
+                    </div>
+
+                    {/* BROWSE */}
+                    {page === "browse" && (
+                        <div className="fade-up">
+                            <div className="section-title">Available Medicines</div>
+                            <p className="section-sub">Browse our full range of medicines. Order online for quick pickup.</p>
+                            <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
+                                <input className="inp" value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍  Search medicines…" style={{ maxWidth: 280 }} />
+                                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                    {categories.map(c => (
+                                        <button key={c} className="btn btn-sm" style={{
+                                            background: category === c ? "var(--primary)" : "var(--bg2)",
+                                            color: category === c ? "#fff" : "var(--muted)",
+                                            border: category === c ? "none" : "1px solid var(--border)",
+                                        }} onClick={() => setCategory(c)}>{c}</button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="grid-auto">
+                                {filtered.map(m => (
+                                    <div key={m.id} className="med-card fade-up">
+                                        <div style={{ fontSize: 32, marginBottom: 10 }}>{m.image}</div>
+                                        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, marginBottom: 3 }}>{m.name}</div>
+                                        <div style={{ marginBottom: 8 }}>
+                                            <span className="pill" style={{ background: "var(--primary-bg)", color: "var(--primary)", fontSize: 10 }}>{m.category}</span>
+                                        </div>
+                                        <div style={{ color: "var(--muted)", fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>{m.description}</div>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <div>
+                                                <div style={{ color: "var(--primary)", fontWeight: 700, fontSize: 16 }}>{fmt(m.price)}</div>
+                                                <div style={{ fontSize: 11, color: "var(--green)" }}>per {m.unit}</div>
+                                            </div>
+                                            <button className="btn btn-primary btn-sm" onClick={() => addToCart(m)}>+ Add</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {filtered.length === 0 && <div style={{ color: "var(--muted)", fontSize: 14, padding: 24, gridColumn: "1/-1" }}>No medicines found.</div>}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* PRESCRIPTION */}
+                    {page === "prescription" && (
+                        <div className="fade-up">
+                            <PrescriptionScanner medicines={medicines} onAddToCart={(m, qty) => { addToCart(m, qty); }} />
+                            {cart.length > 0 && (
+                                <div style={{ marginTop: 20, padding: 16, background: "var(--primary-bg)", border: "1px solid rgba(14,165,233,.2)", borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <span style={{ fontSize: 14 }}><strong>{cart.length}</strong> items in cart — {fmt(total)}</span>
+                                    <button className="btn btn-primary btn-sm" onClick={() => setPage("cart")}>View Cart →</button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* CART */}
+                    {page === "cart" && (
+                        <div className="fade-up">
+                            <div className="section-title">Your Cart</div>
+                            {cart.length === 0 ? (
+                                <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
+                                    <div style={{ fontSize: 52, marginBottom: 12 }}>🛒</div>
+                                    <div style={{ fontSize: 14, marginBottom: 16 }}>Your cart is empty</div>
+                                    <button className="btn btn-primary" onClick={() => setPage("browse")}>Browse Medicines</button>
+                                </div>
+                            ) : (
+                                <div className="grid-2" style={{ alignItems: "start" }}>
+                                    <div>
+                                        <div className="card">
+                                            {cart.map(item => (
+                                                <div key={item.id} className="cart-item">
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ fontWeight: 600, fontSize: 14 }}>{item.name}</div>
+                                                        <div style={{ color: "var(--muted)", fontSize: 12 }}>{fmt(item.price)} per {item.unit}</div>
+                                                    </div>
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                                        <button className="qty-btn-pub" onClick={() => updateQty(item.id, item.qty - 1)}>−</button>
+                                                        <span style={{ minWidth: 24, textAlign: "center", fontWeight: 600 }}>{item.qty}</span>
+                                                        <button className="qty-btn-pub" onClick={() => updateQty(item.id, item.qty + 1)} disabled={item.qty >= item.stock}>+</button>
+                                                    </div>
+                                                    <div style={{ color: "var(--primary)", fontWeight: 700, minWidth: 80, textAlign: "right" }}>{fmt(item.price * item.qty)}</div>
+                                                    <button onClick={() => updateQty(item.id, 0)} style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 18, cursor: "pointer" }}>×</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="card" style={{ marginBottom: 16 }}>
+                                            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Order Summary</div>
+                                            {cart.map(i => (
+                                                <div key={i.id} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 13 }}>
+                                                    <span style={{ color: "var(--muted)" }}>{i.name} ×{i.qty}</span>
+                                                    <span>{fmt(i.price * i.qty)}</span>
+                                                </div>
+                                            ))}
+                                            <div style={{ borderTop: "1px solid var(--border)", marginTop: 12, paddingTop: 12, display: "flex", justifyContent: "space-between" }}>
+                                                <span style={{ fontWeight: 700 }}>Total</span>
+                                                <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, color: "var(--primary)" }}>{fmt(total)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="card">
+                                            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Your Details</div>
+                                            <div style={{ display: "grid", gap: 12 }}>
+                                                <div><label className="lbl">Full Name *</label><input className="inp" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Your name" /></div>
+                                                <div><label className="lbl">Phone *</label><input className="inp" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="07X XXXX XXX" /></div>
+                                                <div><label className="lbl">Address</label><input className="inp" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} placeholder="For home delivery (optional)" /></div>
+                                                <div><label className="lbl">Note</label><input className="inp" value={form.note} onChange={e => setForm(p => ({ ...p, note: e.target.value }))} placeholder="Any special instructions…" /></div>
+                                            </div>
+                                            <button className="btn btn-primary" style={{ width: "100%", marginTop: 16 }} onClick={placeOrder} disabled={!form.name || !form.phone}>
+                                                ✅ Place Order
+                                            </button>
+                                            <div style={{ fontSize: 11, color: "var(--muted)", textAlign: "center", marginTop: 10 }}>We will contact you when order is ready for pickup</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* DONE */}
+                    {page === "done" && (
+                        <div className="fade-up" style={{ textAlign: "center", padding: "60px 0" }}>
+                            <div style={{ fontSize: 64, marginBottom: 16 }}>🎉</div>
+                            <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 26, fontWeight: 800, marginBottom: 8 }}>Order Placed!</div>
+                            <div style={{ color: "var(--muted)", fontSize: 14, marginBottom: 6 }}>Order ID: <strong style={{ color: "var(--primary)" }}>#{orderId}</strong></div>
+                            <div style={{ color: "var(--muted)", fontSize: 13, maxWidth: 400, margin: "0 auto 28px" }}>We'll prepare your medicines and contact you when ready for pickup.</div>
+                            <button className="btn btn-primary" onClick={() => setPage("browse")}>Continue Shopping</button>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ═══════════════════════════ PUBLIC PAGES ═══════════════════════════
+        function HomePage({ medicines, onNavigate }) {
+            const inStock = medicines.filter(m => m.stock > 0).length;
+            return (
+                <div>
+                    {/* HERO */}
+                    <div className="hero fade-up" style={{ borderRadius: 20, marginBottom: 32, position: "relative" }}>
+                        <div style={{ position: "relative", zIndex: 1 }}>
+                            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(14,165,233,.15)", border: "1px solid rgba(14,165,233,.3)", borderRadius: 20, padding: "5px 14px", marginBottom: 20, fontSize: 12, fontWeight: 600, color: "#7dd3fc" }}>
+                                ⚕️ &nbsp;MediVault Pharmacy
+                            </div>
+                            <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: "clamp(28px,5vw,48px)", fontWeight: 800, lineHeight: 1.15, marginBottom: 16 }}>
+                                Your Health,<br />Our Priority
+                            </h1>
+                            <p style={{ color: "rgba(255,255,255,.65)", fontSize: 15, maxWidth: 520, margin: "0 auto 28px", lineHeight: 1.6 }}>
+                                Order medicines online, upload your prescription for instant recognition, and pick up from our pharmacy with ease.
+                            </p>
+                            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+                                <button className="btn btn-primary" style={{ fontSize: 15, padding: "12px 28px" }} onClick={() => onNavigate("order")}>🛒 Order Now</button>
+                                <button className="btn" style={{ background: "rgba(255,255,255,.1)", color: "#fff", border: "1px solid rgba(255,255,255,.2)", fontSize: 15, padding: "12px 28px" }} onClick={() => onNavigate("order")}>📋 Upload Prescription</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="grid-3" style={{ marginBottom: 32 }}>
+                        {[
+                            { icon: "💊", label: "Medicines Available", value: inStock, color: "var(--primary)" },
+                            { icon: "🚀", label: "Fast Pickup", value: "Same Day", color: "var(--green)" },
+                            { icon: "📋", label: "Prescription Scan", value: "AI Powered", color: "var(--violet)" },
+                        ].map((s, i) => (
+                            <div key={i} className="card fade-up" style={{ textAlign: "center", animationDelay: `${i * 0.1}s` }}>
+                                <div style={{ fontSize: 28, marginBottom: 10 }}>{s.icon}</div>
+                                <div style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: s.color, marginBottom: 4 }}>{s.value}</div>
+                                <div style={{ color: "var(--muted)", fontSize: 13 }}>{s.label}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* How it works */}
+                    <div style={{ marginBottom: 36 }}>
+                        <div className="section-title">How It Works</div>
+                        <div className="grid-3">
+                            {[
+                                { step: 1, icon: "📋", title: "Upload Prescription", desc: "Take a photo of your prescription and our AI will read it automatically." },
+                                { step: 2, icon: "🛒", title: "Add to Cart", desc: "Review detected medicines, adjust quantities, and add more if needed." },
+                                { step: 3, icon: "🏥", title: "Pickup Ready", desc: "We'll prepare your order and call you when it's ready to collect." },
+                            ].map((s, i) => (
+                                <div key={i} className="card fade-up" style={{ animationDelay: `${i * 0.1}s` }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                                        <div className="step-dot" style={{ background: "var(--primary)", color: "#fff" }}>{s.step}</div>
+                                        <div style={{ fontSize: 22 }}>{s.icon}</div>
+                                    </div>
+                                    <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{s.title}</div>
+                                    <div style={{ color: "var(--muted)", fontSize: 13, lineHeight: 1.6 }}>{s.desc}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Featured medicines */}
+                    <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                            <div className="section-title" style={{ marginBottom: 0 }}>Featured Medicines</div>
+                            <button className="btn btn-ghost btn-sm" onClick={() => onNavigate("order")}>View All →</button>
+                        </div>
+                        <div className="grid-auto">
+                            {medicines.filter(m => m.stock > 0).slice(0, 4).map((m, i) => (
+                                <div key={m.id} className="med-card fade-up" style={{ animationDelay: `${i * 0.08}s` }}>
+                                    <div style={{ fontSize: 28, marginBottom: 8 }}>{m.image}</div>
+                                    <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{m.name}</div>
+                                    <span className="pill" style={{ background: "var(--primary-bg)", color: "var(--primary)", fontSize: 10, marginBottom: 8, display: "inline-flex" }}>{m.category}</span>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+                                        <span style={{ color: "var(--primary)", fontWeight: 700, fontSize: 15 }}>{fmt(m.price)}</span>
+                                        <button className="btn btn-primary btn-sm" onClick={() => onNavigate("order")}>Order</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function ContactPage() {
+            return (
+                <div className="fade-up">
+                    <div className="section-title">Contact Us</div>
+                    <div className="grid-2" style={{ alignItems: "start" }}>
+                        <div>
+                            <div className="card" style={{ marginBottom: 16 }}>
+                                <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 16 }}>📍 Visit Us</div>
+                                {[
+                                    ["Address", "123 Health Street, Colombo 07, Sri Lanka"],
+                                    ["Phone", "011 234 5678 / 071 234 5678"],
+                                    ["Email", "info@medivault.lk"],
+                                    ["Hours", "Mon–Sat: 8am – 9pm | Sun: 9am – 6pm"],
+                                ].map(([l, v]) => (
+                                    <div key={l} style={{ padding: "9px 0", borderBottom: "1px solid var(--border)", fontSize: 13 }}>
+                                        <span style={{ color: "var(--muted)", minWidth: 70, display: "inline-block" }}>{l}</span>
+                                        <span style={{ fontWeight: 500 }}>{v}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="card">
+                            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 16 }}>📨 Send Message</div>
+                            <div style={{ display: "grid", gap: 12 }}>
+                                <div><label className="lbl">Name</label><input className="inp" placeholder="Your name" /></div>
+                                <div><label className="lbl">Email</label><input className="inp" placeholder="your@email.com" /></div>
+                                <div><label className="lbl">Message</label><textarea className="inp" rows={4} placeholder="How can we help?" style={{ resize: "vertical" }} /></div>
+                            </div>
+                            <button className="btn btn-primary" style={{ width: "100%", marginTop: 14 }}>Send Message</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ═══════════════════════════ STAFF PORTAL ═══════════════════════════
+        // (Full staff management system — same as before but integrated)
+
+        function StaffLogin({ onLogin }) {
+            const [role, setRole] = useState(null);
+            const [pin, setPin] = useState("");
+            const [error, setError] = useState("");
+            const [shake, setShake] = useState(false);
+            const m = role ? ROLE_META[role] : null;
+
+            const tryLogin = p => {
+                const u = USERS.find(u => u.role === role && u.pin === p);
+                if (u) { onLogin(u); }
+                else { setShake(true); setError("Incorrect PIN"); setPin(""); setTimeout(() => setShake(false), 450); }
+            };
+            const handleDigit = d => {
+                if (pin.length >= 4) return;
+                const next = pin + d; setPin(next); setError("");
+                if (next.length === 4) setTimeout(() => tryLogin(next), 180);
+            };
+
+            return (
+                <div style={{ minHeight: "100vh", background: "var(--d-bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 32, padding: 24 }}>
+                    <div style={{ position: "fixed", inset: 0, background: "radial-gradient(ellipse 60% 50% at 50% 0%,rgba(79,163,247,.07),transparent)", pointerEvents: "none" }} />
+                    <div style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
+                        <div style={{ fontSize: 40, marginBottom: 10 }}>⚕️</div>
+                        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 26, color: "var(--d-text)", letterSpacing: "-.5px" }}>MediVault</div>
+                        <div style={{ color: "var(--d-muted)", fontSize: 13, marginTop: 4 }}>Staff Portal</div>
+                    </div>
+                    {!role ? (
+                        <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                            {Object.entries(ROLE_META).map(([r, meta]) => (
+                                <div key={r} onClick={() => setRole(r)} className="fade-up"
+                                    style={{ background: "var(--d-surface)", border: `1px solid ${meta.color}22`, borderRadius: 16, padding: "24px 20px", cursor: "pointer", textAlign: "center", width: 125, transition: "all .2s" }}
+                                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.borderColor = `${meta.color}55`; }}
+                                    onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.borderColor = `${meta.color}22`; }}>
+                                    <div style={{ fontSize: 30, marginBottom: 10 }}>{meta.icon}</div>
+                                    <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13, color: meta.color }}>{meta.label}</div>
+                                    <div style={{ color: "var(--d-muted)", fontSize: 11, marginTop: 4 }}>Tap to login</div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ textAlign: "center", position: "relative", zIndex: 1 }} className="fade-up">
+                            <div style={{ marginBottom: 6 }}>
+                                <span style={{ background: m.bg, color: m.color, border: `1px solid ${m.color}33`, display: "inline-flex", alignItems: "center", gap: 4, padding: "5px 14px", borderRadius: 20, fontSize: 13, fontWeight: 600 }}>
+                                    {m.icon} {m.label} Access
+                                </span>
+                            </div>
+                            <div style={{ color: "var(--d-muted)", fontSize: 13, marginBottom: 24 }}>Enter your 4-digit PIN</div>
+                            <div className={shake ? "shake" : ""} style={{ display: "flex", gap: 14, justifyContent: "center", marginBottom: 28 }}>
+                                {[0, 1, 2, 3].map(i => (
+                                    <div key={i} style={{ width: 14, height: 14, borderRadius: "50%", border: `2px solid ${pin.length > i ? m.color : "rgba(255,255,255,.2)"}`, background: pin.length > i ? m.color : "transparent", transition: "all .2s" }} />
+                                ))}
+                            </div>
+                            {error && <div style={{ color: "var(--d-red)", fontSize: 12.5, marginBottom: 14 }}>{error}</div>}
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,68px)", gap: 10, justifyContent: "center" }}>
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0, "⌫"].map((d, i) => (
+                                    <button key={i} onClick={() => { if (d === "⌫") setPin(p => p.slice(0, -1)); else if (d !== "") handleDigit(String(d)); }}
+                                        style={{ width: 68, height: 68, borderRadius: 12, border: "1px solid var(--d-border-hi)", background: "var(--d-surface2)", color: "var(--d-text)", fontSize: 20, fontWeight: 600, fontFamily: "'Syne',sans-serif", cursor: d === "" ? "default" : "pointer", visibility: d === "" ? "hidden" : "visible", transition: "all .15s" }}>
+                                        {d}
+                                    </button>
+                                ))}
+                            </div>
+                            <button onClick={() => { setRole(null); setPin(""); setError(""); }} style={{ marginTop: 18, background: "none", border: "none", color: "var(--d-muted)", fontSize: 13, cursor: "pointer" }}>
+                                ← Choose role
+                            </button>
+                            <div style={{ marginTop: 14, color: "rgba(255,255,255,.15)", fontSize: 11 }}>
+                                Demo: Owner 1111 · Stock 2222 · Counter 3333 · Finance 4444
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Staff dashboard layout
+        function DashLayoutD({ color, tabs, active, onTab, children, user, onExit }) {
+            return (
+                <div style={{ minHeight: "100vh", background: "var(--d-bg)", fontFamily: "'DM Sans',sans-serif" }}>
+                    {/* Staff topbar */}
+                    <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 58, zIndex: 200, background: "rgba(8,12,20,.95)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--d-border)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <span style={{ fontSize: 18 }}>⚕️</span>
+                            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16, color: "var(--d-text)", letterSpacing: "-.5px" }}>MediVault</span>
+                            <span style={{ background: "rgba(79,163,247,.15)", color: "#4fa3f7", border: "1px solid rgba(79,163,247,.25)", padding: "2px 9px", borderRadius: 12, fontSize: 10.5, fontWeight: 600 }}>Staff Portal</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <span style={{ color: "var(--d-muted)", fontSize: 13 }}>{user.name}</span>
+                            <button className="btn btn-dark btn-sm" onClick={onExit}>← Exit Portal</button>
+                        </div>
+                    </div>
+                    <div style={{ paddingTop: 58, display: "grid", gridTemplateColumns: "210px 1fr", minHeight: "calc(100vh - 58px)" }}>
+                        <aside style={{ background: "var(--d-surface)", borderRight: "1px solid var(--d-border)", padding: "18px 10px" }}>
+                            {tabs.map(t => (
+                                <button key={t.id} className={`nav-item-d${active === t.id ? " active" : ""}`} onClick={() => onTab(t.id)}
+                                    style={active === t.id ? { color: t.color || color } : {}}>
+                                    <span style={{ fontSize: 15 }}>{t.icon}</span>{t.label}
+                                    {active === t.id && <span style={{ marginLeft: "auto", width: 4, height: 4, borderRadius: "50%", background: t.color || color }} />}
+                                </button>
+                            ))}
+                        </aside>
+                        <main style={{ padding: "26px 30px", overflowY: "auto", background: "var(--d-bg)" }}>
+                            {children}
+                        </main>
+                    </div>
+                </div>
+            );
+        }
+
+        function DSectionHeader({ title, children }) {
+            return (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22 }}>
+                    <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: 20, fontWeight: 700, color: "var(--d-text)" }}>{title}</h2>
+                    {children && <div style={{ display: "flex", gap: 8 }}>{children}</div>}
+                </div>
+            );
+        }
+        function DCard({ title, children, style, extra }) {
+            return (
+                <div className="card-dark" style={style}>
+                    {(title || extra) && <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                        {title && <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--d-muted)" }}>{title}</div>}
+                        {extra}
+                    </div>}
+                    {children}
+                </div>
+            );
+        }
+        function DBadge({ color, children }) { return <span className="badge" style={{ background: `${color}22`, color, border: `1px solid ${color}44` }}>{children}</span>; }
+        function DEmpty({ children }) { return <div style={{ color: "var(--d-muted)", textAlign: "center", padding: "32px 0", fontSize: 13 }}>{children}</div>; }
+
+        // ── Owner Dashboard ──
+        function OwnerDash({ state, update }) {
+            const [tab, setTab] = useState("overview");
+            const totalSales = state.sales.reduce((s, b) => s + b.total, 0);
+            const profit = totalSales * 0.38;
+            const lowStock = state.medicines.filter(m => m.stock < m.minStock);
+            const expiringSoon = state.medicines.filter(m => daysLeft(m.expiry) <= 60);
+            const pendingOrders = state.publicOrders?.filter(o => o.status === "pending") || [];
+
+            return (
+                <div className="fade-up">
+                    {tab === "overview" && <>
+                        <DSectionHeader title="Business Overview" />
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 14, marginBottom: 28 }}>
+                            <StatCardD icon="💰" label="Total Revenue" value={fmt(totalSales)} color="#f5a623" />
+                            <StatCardD icon="📈" label="Est. Profit" value={fmt(profit)} color="#22d3a6" />
+                            <StatCardD icon="📦" label="Medicines" value={state.medicines.length} color="#4fa3f7" />
+                            <StatCardD icon="⚠️" label="Low Stock" value={lowStock.length} color="#f87171" />
+                            <StatCardD icon="🛒" label="Online Orders" value={state.publicOrders?.length || 0} color="#a78bfa" />
+                            <StatCardD icon="⏳" label="Pending Orders" value={pendingOrders.length} color="#fb923c" />
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                            <DCard title="⚠️ Low Stock Alerts">
+                                {lowStock.length === 0 ? <DEmpty>All stocks adequate</DEmpty> : lowStock.map(m => (
+                                    <div key={m.id} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid var(--d-border)" }}>
+                                        <span style={{ fontSize: 13, color: "var(--d-text)" }}>{m.name}</span>
+                                        <span style={{ fontSize: 12, color: "var(--d-red)", fontWeight: 600 }}>{m.stock}/{m.minStock}</span>
+                                    </div>
+                                ))}
+                            </DCard>
+                            <DCard title="🛒 Recent Online Orders">
+                                {(state.publicOrders || []).slice(-5).reverse().map(o => (
+                                    <div key={o.id} style={{ padding: "8px 0", borderBottom: "1px solid var(--d-border)" }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                            <span style={{ color: "var(--d-text)", fontSize: 13, fontWeight: 500 }}>{o.customer}</span>
+                                            <DBadge color={o.status === "ready" ? "#22d3a6" : o.status === "pending" ? "#f5a623" : "#4fa3f7"}>{o.status}</DBadge>
+                                        </div>
+                                        <div style={{ color: "var(--d-muted)", fontSize: 11, marginTop: 2 }}>{o.items.length} items · {fmt(o.total)}</div>
+                                    </div>
+                                ))}
+                            </DCard>
+                        </div>
+                    </>}
+                </div>
+            );
+        }
+
+        // ── Stock Dashboard ──
+        function StockDash({ state, update, user }) {
+            const [tab, setTab] = useState("inventory");
+            const [search, setSearch] = useState("");
+            const [showAdd, setShowAdd] = useState(false);
+            const [showReq, setShowReq] = useState(false);
+            const [newMed, setNewMed] = useState({ name: "", category: "", stock: "", minStock: "", price: "", costPrice: "", expiry: "", supplier: "", unit: "tablets" });
+            const [req, setReq] = useState({ medicine: "", qty: "", cost: "" });
+            const lowStock = state.medicines.filter(m => m.stock < m.minStock);
+            const expiringSoon = state.medicines.filter(m => daysLeft(m.expiry) <= 60);
+            const filtered = state.medicines.filter(m => m.name.toLowerCase().includes(search.toLowerCase()));
+
+            const addMed = () => {
+                if (!newMed.name || !newMed.stock) return;
+                const med = { ...newMed, id: state.medIdCounter, stock: +newMed.stock, minStock: +newMed.minStock, price: +newMed.price, costPrice: +newMed.costPrice, image: "💊" };
+                update({ medicines: [...state.medicines, med], medIdCounter: state.medIdCounter + 1 });
+                setNewMed({ name: "", category: "", stock: "", minStock: "", price: "", costPrice: "", expiry: "", supplier: "", unit: "tablets" });
+                setShowAdd(false);
+            };
+            const submitReq = () => {
+                if (!req.medicine || !req.qty) return;
+                update({ stockRequests: [...state.stockRequests, { id: Date.now(), medicine: req.medicine, qty: +req.qty, cost: +req.cost, status: "pending", date: today(), requester: user.name }] });
+                setReq({ medicine: "", qty: "", cost: "" }); setShowReq(false);
+            };
+
+            const tabs = [
+                { id: "inventory", label: "Inventory", icon: "📦", color: "#4fa3f7" },
+                { id: "alerts", label: "Alerts", icon: "🔔" },
+                { id: "requests", label: "Requests", icon: "📋" },
+            ];
+            return (
+                <DashLayoutD color="#4fa3f7" tabs={tabs} active={tab} onTab={setTab} user={user} onExit={() => { }}>
+                    {tab === "inventory" && <div className="fade-up">
+                        <DSectionHeader title="Stock Inventory">
+                            <button className="btn btn-dark btn-sm" onClick={() => setShowReq(true)}>📋 Request Stock</button>
+                            <button className="btn btn-sm" style={{ background: "#4fa3f7", color: "#fff" }} onClick={() => setShowAdd(true)}>+ Add Medicine</button>
+                        </DSectionHeader>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 14, marginBottom: 24 }}>
+                            <StatCardD icon="📦" label="Total Items" value={state.medicines.length} color="#4fa3f7" />
+                            <StatCardD icon="⚠️" label="Low Stock" value={lowStock.length} color="#f87171" />
+                            <StatCardD icon="🕐" label="Expiring ≤60d" value={expiringSoon.length} color="#fb923c" />
+                        </div>
+                        <DCard>
+                            <input className="inp-dark" value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍  Search medicines…" style={{ marginBottom: 14 }} />
+                            <table className="tbl tbl-dark">
+                                <thead><tr>{["Medicine", "Category", "Stock", "Min", "Price", "Expiry", "Action"].map(h => <th key={h}>{h}</th>)}</tr></thead>
+                                <tbody>
+                                    {filtered.map(m => {
+                                        const d = daysLeft(m.expiry); const low = m.stock < m.minStock;
+                                        return (
+                                            <tr key={m.id} style={{ opacity: m.stock === 0 ? .4 : 1 }}>
+                                                <td style={{ color: "var(--d-text)", fontWeight: 500 }}>{m.name}</td>
+                                                <td style={{ color: "var(--d-muted)" }}>{m.category}</td>
+                                                <td style={{ color: low ? "var(--d-red)" : m.stock === 0 ? "var(--d-muted)" : "var(--d-green)", fontWeight: 600 }}>{m.stock}</td>
+                                                <td style={{ color: "var(--d-muted)" }}>{m.minStock}</td>
+                                                <td style={{ color: "var(--d-text)" }}>{fmt(m.price)}</td>
+                                                <td style={{ color: d <= 30 ? "var(--d-red)" : d <= 60 ? "var(--d-orange)" : "var(--d-muted)" }}>{m.expiry}</td>
+                                                <td>{d <= 0 && m.stock > 0 && <button className="btn btn-danger-d btn-sm" onClick={() => update({ medicines: state.medicines.map(x => x.id === m.id ? { ...x, stock: 0 } : x) })}>Remove</button>}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </DCard>
+                        {showAdd && <Modal title="Add New Medicine" onClose={() => setShowAdd(false)} dark>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                {[["Medicine Name", "name", "text"], ["Category", "category", "text"], ["Stock Qty", "stock", "number"], ["Min Stock", "minStock", "number"], ["Sell Price", "price", "number"], ["Cost Price", "costPrice", "number"], ["Expiry", "expiry", "date"], ["Supplier", "supplier", "text"]].map(([l, k, t]) => (
+                                    <div key={k}><label className="lbl-dark">{l}</label><input type={t} className="inp-dark" value={newMed[k]} onChange={e => setNewMed(p => ({ ...p, [k]: e.target.value }))} /></div>
+                                ))}
+                            </div>
+                            <button className="btn btn-sm" style={{ background: "#4fa3f7", color: "#fff", width: "100%", marginTop: 18, padding: "10px" }} onClick={addMed}>Add Medicine</button>
+                        </Modal>}
+                        {showReq && <Modal title="Request Stock" onClose={() => setShowReq(false)} dark width={440}>
+                            <div style={{ display: "grid", gap: 12 }}>
+                                {[["Medicine", "medicine", "text"], ["Quantity", "qty", "number"], ["Est. Cost", "cost", "number"]].map(([l, k, t]) => (
+                                    <div key={k}><label className="lbl-dark">{l}</label><input type={t} className="inp-dark" value={req[k]} onChange={e => setReq(p => ({ ...p, [k]: e.target.value }))} /></div>
+                                ))}
+                            </div>
+                            <button className="btn btn-sm" style={{ background: "#4fa3f7", color: "#fff", width: "100%", marginTop: 18, padding: "10px" }} onClick={submitReq}>Submit Request</button>
+                        </Modal>}
+                    </div>}
+                    {tab === "alerts" && <div className="fade-up">
+                        <DSectionHeader title="Stock Alerts" />
+                        {lowStock.length > 0 && <DCard title="⚠️ Low Stock" style={{ marginBottom: 16 }}>
+                            {lowStock.map(m => (
+                                <div key={m.id} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--d-border)" }}>
+                                    <div><div style={{ fontWeight: 600, color: "var(--d-text)" }}>{m.name}</div><div style={{ color: "var(--d-muted)", fontSize: 11 }}>Min: {m.minStock} {m.unit}</div></div>
+                                    <div style={{ textAlign: "right" }}><div style={{ color: "var(--d-red)", fontWeight: 700, fontSize: 18 }}>{m.stock}</div><div style={{ color: "var(--d-muted)", fontSize: 11 }}>{m.unit}</div></div>
+                                </div>
+                            ))}
+                        </DCard>}
+                        {expiringSoon.length > 0 && <DCard title="🕐 Expiry Alerts">
+                            {expiringSoon.map(m => {
+                                const d = daysLeft(m.expiry); return (
+                                    <div key={m.id} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--d-border)" }}>
+                                        <div><div style={{ fontWeight: 600, color: "var(--d-text)" }}>{m.name}</div><div style={{ color: "var(--d-muted)", fontSize: 11 }}>Exp: {m.expiry}</div></div>
+                                        <div style={{ textAlign: "right" }}><div style={{ color: d <= 30 ? "var(--d-red)" : "var(--d-orange)", fontWeight: 700 }}>{d}d</div><div style={{ color: "var(--d-muted)", fontSize: 11 }}>Stock: {m.stock}</div></div>
+                                    </div>
+                                );
+                            })}
+                        </DCard>}
+                        {lowStock.length === 0 && expiringSoon.length === 0 && <DEmpty>✅ No alerts</DEmpty>}
+                    </div>}
+                    {tab === "requests" && <div className="fade-up">
+                        <DSectionHeader title="Stock Requests" />
+                        {state.stockRequests.map(r => (
+                            <div key={r.id} className="card-dark" style={{ marginBottom: 12, borderColor: `${r.status === "approved" ? "#22d3a6" : r.status === "rejected" ? "#f87171" : "#f5a623"}22` }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                                    <div><div style={{ fontWeight: 600, color: "var(--d-text)" }}>{r.medicine}</div><div style={{ color: "var(--d-muted)", fontSize: 12 }}>{r.requester} · {r.date}</div></div>
+                                    <DBadge color={r.status === "approved" ? "#22d3a6" : r.status === "rejected" ? "#f87171" : "#f5a623"}>{r.status}</DBadge>
+                                </div>
+                                <div style={{ fontSize: 13, color: "var(--d-muted)" }}>Qty: <strong style={{ color: "var(--d-text)" }}>{r.qty}</strong> · Cost: <strong style={{ color: "var(--d-green)" }}>{fmt(r.cost)}</strong></div>
+                            </div>
+                        ))}
+                    </div>}
+                </DashLayoutD>
+            );
+        }
+
+        // ── Counter Dashboard ──
+        function CounterDash({ state, update, user }) {
+            const [tab, setTab] = useState("billing");
+            const [search, setSearch] = useState("");
+            const [cart, setCart] = useState([]);
+            const [done, setDone] = useState(false);
+            const [form, setForm] = useState({ name: "", phone: "", address: "", note: "" });
+
+            const results = search.length > 1 ? state.medicines.filter(m => m.name.toLowerCase().includes(search.toLowerCase()) && m.stock > 0) : [];
+            const addToCart = med => {
+                setCart(c => { const ex = c.find(x => x.id === med.id); if (ex) return c.map(x => x.id === med.id ? { ...x, qty: x.qty + 1 } : x); return [...c, { ...med, qty: 1 }]; });
+                setSearch("");
+            };
+            const updateQty = (id, qty) => { if (qty <= 0) setCart(c => c.filter(x => x.id !== id)); else setCart(c => c.map(x => x.id === id ? { ...x, qty } : x)); };
+            const total = cart.reduce((s, x) => s + x.price * x.qty, 0);
+            const checkout = () => {
+                if (!cart.length) return;
+                const bill = { id: state.billIdCounter, date: today(), items: cart.map(x => ({ name: x.name, qty: x.qty, price: x.price })), total, cashier: user.name };
+                const updMeds = state.medicines.map(m => { const ci = cart.find(x => x.id === m.id); return ci ? { ...m, stock: m.stock - ci.qty } : m; });
+                update({ sales: [...state.sales, bill], medicines: updMeds, billIdCounter: state.billIdCounter + 1 });
+                setDone(true); setTimeout(() => { setCart([]); setDone(false); }, 3000);
+            };
+
+            const outOfStock = state.medicines.filter(m => m.stock === 0);
+            const lowStock = state.medicines.filter(m => m.stock > 0 && m.stock < m.minStock);
+            const onlineOrders = (state.publicOrders || []).filter(o => o.status === "pending");
+
+            const tabs = [
+                { id: "billing", label: "Billing", icon: "🧾", color: "#e879a0" },
+                { id: "online", label: `Online Orders ${onlineOrders.length > 0 ? `(${onlineOrders.length})` : ""}`, icon: "🛒" },
+                { id: "medicines", label: "Medicines", icon: "💊" },
+                { id: "history", label: "History", icon: "📋" },
+            ];
+            return (
+                <DashLayoutD color="#e879a0" tabs={tabs} active={tab} onTab={setTab} user={user} onExit={() => { }}>
+                    {tab === "billing" && <div className="fade-up" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 20 }}>
+                        <div>
+                            <DSectionHeader title="New Bill" />
+                            {(outOfStock.length > 0 || lowStock.length > 0) && <div style={{ background: "rgba(251,146,60,.06)", border: "1px solid rgba(251,146,60,.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 16, fontSize: 12.5 }}>
+                                {outOfStock.length > 0 && <div style={{ color: "var(--d-red)" }}>❌ Out of Stock: {outOfStock.map(m => m.name).join(", ")}</div>}
+                                {lowStock.length > 0 && <div style={{ color: "var(--d-orange)", marginTop: 2 }}>⚠️ Low: {lowStock.map(m => `${m.name}(${m.stock})`).join(", ")}</div>}
+                            </div>}
+                            <div style={{ position: "relative", marginBottom: 16 }}>
+                                <input className="inp-dark" value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍  Search medicine…" />
+                                {results.length > 0 && <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "var(--d-surface)", border: "1px solid var(--d-border-hi)", borderRadius: 12, zIndex: 50, maxHeight: 230, overflowY: "auto", boxShadow: "0 20px 40px rgba(0,0,0,.5)" }}>
+                                    {results.map(m => <div key={m.id} onClick={() => addToCart(m)} style={{ padding: "10px 14px", cursor: "pointer", display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--d-border)" }}>
+                                        <div><div style={{ color: "var(--d-text)", fontSize: 13.5, fontWeight: 500 }}>{m.name}</div><div style={{ color: "var(--d-muted)", fontSize: 11 }}>{m.category} · {m.stock}</div></div>
+                                        <div style={{ color: "#e879a0", fontWeight: 700 }}>{fmt(m.price)}</div>
+                                    </div>)}
+                                </div>}
+                            </div>
+                            {cart.length > 0 ? <DCard>
+                                {cart.map(item => (
+                                    <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "9px 0", borderBottom: "1px solid var(--d-border)" }}>
+                                        <div style={{ flex: 1 }}><div style={{ color: "var(--d-text)", fontSize: 13.5, fontWeight: 500 }}>{item.name}</div><div style={{ color: "var(--d-muted)", fontSize: 12 }}>{fmt(item.price)} each</div></div>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                            <button onClick={() => updateQty(item.id, item.qty - 1)} style={{ width: 26, height: 26, borderRadius: 6, border: "1px solid var(--d-border-hi)", background: "var(--d-surface2)", color: "var(--d-text)", fontSize: 15, cursor: "pointer" }}>−</button>
+                                            <span style={{ color: "var(--d-text)", minWidth: 24, textAlign: "center", fontWeight: 600 }}>{item.qty}</span>
+                                            <button onClick={() => updateQty(item.id, item.qty + 1)} disabled={item.qty >= item.stock} style={{ width: 26, height: 26, borderRadius: 6, border: "1px solid var(--d-border-hi)", background: "var(--d-surface2)", color: "var(--d-text)", fontSize: 15, cursor: "pointer" }}>+</button>
+                                        </div>
+                                        <div style={{ color: "#e879a0", fontWeight: 700, minWidth: 78, textAlign: "right" }}>{fmt(item.price * item.qty)}</div>
+                                    </div>
+                                ))}
+                            </DCard> : <div style={{ textAlign: "center", padding: 60, color: "var(--d-muted)" }}><div style={{ fontSize: 44, marginBottom: 10 }}>🛒</div><div style={{ fontSize: 13 }}>Add medicines to bill</div></div>}
+                        </div>
+                        <div style={{ paddingTop: 42 }}>
+                            <DCard title="Bill Summary">
+                                {cart.map(i => <div key={i.id} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 12.5 }}><span style={{ color: "var(--d-muted)" }}>{i.name} ×{i.qty}</span><span style={{ color: "var(--d-text)" }}>{fmt(i.price * i.qty)}</span></div>)}
+                                <div style={{ borderTop: "1px solid var(--d-border)", marginTop: 12, paddingTop: 12, display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+                                    <span style={{ color: "var(--d-muted)", fontWeight: 600 }}>TOTAL</span>
+                                    <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 22, color: "#e879a0" }}>{fmt(total)}</span>
+                                </div>
+                                {done ? <div style={{ textAlign: "center", padding: 14, background: "rgba(34,211,166,.1)", border: "1px solid rgba(34,211,166,.3)", borderRadius: 10, color: "var(--d-green)" }}>✅ Bill #{state.billIdCounter - 1} Complete!</div>
+                                    : <button className="btn" style={{ width: "100%", background: "#e879a0", color: "#fff" }} onClick={checkout} disabled={!cart.length}>🖨 Checkout & Print</button>}
+                                {cart.length > 0 && !done && <button className="btn btn-dark" style={{ width: "100%", marginTop: 8, fontSize: 13 }} onClick={() => setCart([])}>Clear Cart</button>}
+                            </DCard>
+                        </div>
+                    </div>}
+                    {tab === "online" && <div className="fade-up">
+                        <DSectionHeader title="Online Orders" />
+                        {(state.publicOrders || []).length === 0 ? <DEmpty>No orders yet</DEmpty> : (state.publicOrders || []).slice().reverse().map(o => (
+                            <div key={o.id} className="card-dark" style={{ marginBottom: 12, borderColor: `${o.status === "ready" ? "#22d3a6" : o.status === "pending" ? "#f5a623" : "#4fa3f7"}22` }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                                    <div>
+                                        <div style={{ color: "var(--d-text)", fontWeight: 600 }}>#{o.id} · {o.customer}</div>
+                                        <div style={{ color: "var(--d-muted)", fontSize: 12 }}>{o.phone} · {o.date}</div>
+                                    </div>
+                                    <DBadge color={o.status === "ready" ? "#22d3a6" : o.status === "pending" ? "#f5a623" : "#4fa3f7"}>{o.status}</DBadge>
+                                </div>
+                                <div style={{ fontSize: 13, color: "var(--d-muted)", marginBottom: 10 }}>{o.items.map(i => `${i.name} ×${i.qty}`).join(" · ")}</div>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <span style={{ color: "var(--d-green)", fontWeight: 700, fontSize: 16 }}>{fmt(o.total)}</span>
+                                    {o.status === "pending" && <button className="btn btn-success-d btn-sm" onClick={() => update({ publicOrders: (state.publicOrders || []).map(x => x.id === o.id ? { ...x, status: "ready" } : x) })}>✓ Mark Ready</button>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>}
+                    {tab === "medicines" && <div className="fade-up">
+                        <DSectionHeader title="Available Medicines" />
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 14 }}>
+                            {state.medicines.map(m => (
+                                <div key={m.id} className="card-dark" style={{ opacity: m.stock === 0 ? .45 : 1 }}>
+                                    <div style={{ fontWeight: 600, color: "var(--d-text)", fontSize: 14, marginBottom: 4 }}>{m.name}</div>
+                                    <div style={{ color: "var(--d-muted)", fontSize: 12, marginBottom: 10 }}>{m.category}</div>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <div><div style={{ color: "#e879a0", fontWeight: 700, fontSize: 15 }}>{fmt(m.price)}</div><div style={{ fontSize: 11, color: m.stock === 0 ? "var(--d-red)" : m.stock < m.minStock ? "var(--d-orange)" : "var(--d-green)" }}>{m.stock === 0 ? "Out of stock" : `${m.stock} in stock`}</div></div>
+                                        {m.stock > 0 && <button className="btn btn-sm" style={{ background: "rgba(232,121,160,.12)", border: "1px solid rgba(232,121,160,.3)", color: "#e879a0" }} onClick={() => { addToCart(m); setTab("billing"); }}>+ Add</button>}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>}
+                    {tab === "history" && <div className="fade-up">
+                        <DSectionHeader title="My Sales History" />
+                        <DCard>
+                            {state.sales.filter(s => s.cashier === user.name).length === 0 ? <DEmpty>No sales yet</DEmpty> :
+                                [...state.sales].filter(s => s.cashier === user.name).reverse().map(s => (
+                                    <div key={s.id} style={{ padding: "11px 0", borderBottom: "1px solid var(--d-border)" }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}><span style={{ color: "#e879a0", fontWeight: 600 }}>Bill #{s.id}</span><span style={{ color: "var(--d-green)", fontWeight: 600 }}>{fmt(s.total)}</span></div>
+                                        <div style={{ color: "var(--d-muted)", fontSize: 12 }}>{s.date} · {s.items.map(i => `${i.name}×${i.qty}`).join(", ")}</div>
+                                    </div>
+                                ))}
+                        </DCard>
+                    </div>}
+                </DashLayoutD>
+            );
+        }
+
+        // ── Finance Dashboard ──
+        function FinanceDash({ state, update, user }) {
+            const [tab, setTab] = useState("overview");
+            const [salEd, setSalEd] = useState(null);
+            const [salVal, setSalVal] = useState("");
+            const totalRev = state.sales.reduce((s, b) => s + b.total, 0);
+            const totalCost = state.medicines.reduce((s, m) => s + m.costPrice * (MEDICINES.find(x => x.id === m.id)?.stock - m.stock || 0), 0);
+            const totalSal = state.employees.reduce((s, e) => s + e.salary, 0);
+            const netProfit = totalRev - Math.abs(totalCost) - totalSal;
+            const approve = id => update({ stockRequests: state.stockRequests.map(r => r.id === id ? { ...r, status: "approved" } : r) });
+            const reject = id => update({ stockRequests: state.stockRequests.map(r => r.id === id ? { ...r, status: "rejected" } : r) });
+
+            const tabs = [
+                { id: "overview", label: "Overview", icon: "📊", color: "#22d3a6" },
+                { id: "profit", label: "P&L", icon: "💹" },
+                { id: "salaries", label: "Salaries", icon: "💳" },
+                { id: "approvals", label: "Approvals", icon: "✅" },
+            ];
+            const PLRow = ({ label, value, color, large }) => (
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid var(--d-border)" }}>
+                    <span style={{ color: "var(--d-muted)", fontSize: large ? 15 : 13.5, fontWeight: large ? 700 : 400 }}>{label}</span>
+                    <span style={{ color: color || "var(--d-text)", fontWeight: 700, fontSize: large ? 20 : 14 }}>{value}</span>
+                </div>
+            );
+            return (
+                <DashLayoutD color="#22d3a6" tabs={tabs} active={tab} onTab={setTab} user={user} onExit={() => { }}>
+                    {tab === "overview" && <div className="fade-up">
+                        <DSectionHeader title="Financial Overview" />
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(165px,1fr))", gap: 14, marginBottom: 28 }}>
+                            <StatCardD icon="💵" label="Total Revenue" value={fmt(totalRev)} color="#22d3a6" />
+                            <StatCardD icon="📦" label="Stock Costs" value={fmt(Math.abs(totalCost))} color="#4fa3f7" />
+                            <StatCardD icon="👥" label="Total Salaries" value={fmt(totalSal)} color="#e879a0" />
+                            <StatCardD icon="📈" label="Net Profit" value={fmt(netProfit)} color={netProfit > 0 ? "#22d3a6" : "#f87171"} />
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                            <DCard title="Revenue by Day">
+                                {state.sales.map(s => (
+                                    <div key={s.id} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid var(--d-border)", fontSize: 13 }}>
+                                        <span style={{ color: "var(--d-muted)" }}>{s.date} — #{s.id}</span>
+                                        <span style={{ color: "var(--d-green)", fontWeight: 600 }}>{fmt(s.total)}</span>
+                                    </div>
+                                ))}
+                            </DCard>
+                            <DCard title="Pending Approvals">
+                                {state.stockRequests.filter(r => r.status === "pending").length === 0 ? <DEmpty>No pending</DEmpty> :
+                                    state.stockRequests.filter(r => r.status === "pending").map(r => (
+                                        <div key={r.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--d-border)" }}>
+                                            <div style={{ fontWeight: 500, color: "var(--d-text)", marginBottom: 4 }}>{r.medicine}</div>
+                                            <div style={{ color: "var(--d-muted)", fontSize: 12, marginBottom: 8 }}>Qty:{r.qty} · {fmt(r.cost)}</div>
+                                            <div style={{ display: "flex", gap: 8 }}>
+                                                <button className="btn btn-success-d btn-sm" onClick={() => approve(r.id)}>✓ Approve</button>
+                                                <button className="btn btn-danger-d btn-sm" onClick={() => reject(r.id)}>✗ Reject</button>
+                                            </div>
+                                        </div>
+                                    ))
+                                }
+                            </DCard>
+                        </div>
+                    </div>}
+                    {tab === "profit" && <div className="fade-up">
+                        <DSectionHeader title="Profit & Loss" />
+                        <DCard style={{ maxWidth: 580 }}>
+                            <div style={{ marginBottom: 20 }}>
+                                <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--d-muted)", marginBottom: 14 }}>Income</div>
+                                <PLRow label="Total Sales Revenue" value={fmt(totalRev)} color="var(--d-green)" />
+                            </div>
+                            <div style={{ marginBottom: 20 }}>
+                                <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--d-muted)", marginBottom: 14 }}>Expenses</div>
+                                <PLRow label="Medicine Procurement" value={`− ${fmt(Math.abs(totalCost))}`} color="var(--d-red)" />
+                                <PLRow label="Staff Salaries" value={`− ${fmt(totalSal)}`} color="var(--d-red)" />
+                                <PLRow label="Other" value="− Rs. 0.00" color="var(--d-muted)" />
+                            </div>
+                            <div style={{ borderTop: "2px solid var(--d-border-hi)", paddingTop: 16 }}>
+                                <PLRow label="NET PROFIT" value={fmt(netProfit)} color={netProfit > 0 ? "var(--d-green)" : "var(--d-red)"} large />
+                                <PLRow label="Profit Margin" value={`${totalRev ? ((netProfit / totalRev) * 100).toFixed(1) : 0}%`} color="var(--d-blue)" />
+                            </div>
+                        </DCard>
+                    </div>}
+                    {tab === "salaries" && <div className="fade-up">
+                        <DSectionHeader title="Salary Management" />
+                        <div style={{ display: "grid", gap: 12 }}>
+                            {state.employees.map(emp => {
+                                const m = ROLE_META[emp.role];
+                                return (
+                                    <div key={emp.id} className="card-dark" style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                                        <div style={{ width: 40, height: 40, borderRadius: "50%", background: `linear-gradient(135deg,${m.color},${m.color}55)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#000", flexShrink: 0 }}>{emp.name.split(" ").map(n => n[0]).join("")}</div>
+                                        <div style={{ flex: 1 }}><div style={{ fontWeight: 600, color: "var(--d-text)" }}>{emp.name}</div><div style={{ color: m.color, fontSize: 11.5 }}>{m.icon} {m.label}</div></div>
+                                        <div style={{ flex: 1 }}>
+                                            {salEd === emp.id ? (
+                                                <div style={{ display: "flex", gap: 8 }}>
+                                                    <input type="number" className="inp-dark" value={salVal} onChange={e => setSalVal(e.target.value)} style={{ width: 110 }} />
+                                                    <button className="btn btn-success-d btn-sm" onClick={() => { update({ employees: state.employees.map(e => e.id === emp.id ? { ...e, salary: +salVal } : e) }); setSalEd(null); }}>Save</button>
+                                                </div>
+                                            ) : (
+                                                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                                    <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, color: "var(--d-text)" }}>{fmt(emp.salary)}</span>
+                                                    <button className="btn btn-dark btn-sm" onClick={() => { setSalEd(emp.id); setSalVal(emp.salary); }}>Edit</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button className="btn btn-sm" style={{ background: emp.paid ? "rgba(34,211,166,.1)" : "rgba(251,146,60,.1)", border: `1px solid ${emp.paid ? "rgba(34,211,166,.35)" : "rgba(251,146,60,.35)"}`, color: emp.paid ? "var(--d-green)" : "var(--d-orange)" }}
+                                            onClick={() => update({ employees: state.employees.map(e => e.id === emp.id ? { ...e, paid: !e.paid } : e) })}>
+                                            {emp.paid ? "✓ Paid" : "Mark Paid"}
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                            <div className="card-dark" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ color: "var(--d-muted)", fontSize: 14 }}>Total Payout</span>
+                                <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 20, color: "var(--d-green)" }}>{fmt(totalSal)}</span>
+                            </div>
+                        </div>
+                    </div>}
+                    {tab === "approvals" && <div className="fade-up">
+                        <DSectionHeader title="Stock Approvals" />
+                        {state.stockRequests.map(r => (
+                            <div key={r.id} className="card-dark" style={{ marginBottom: 12, borderColor: `${r.status === "approved" ? "#22d3a6" : r.status === "rejected" ? "#f87171" : "#f5a623"}22` }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                                    <div><div style={{ fontWeight: 600, color: "var(--d-text)", fontSize: 15 }}>{r.medicine}</div><div style={{ color: "var(--d-muted)", fontSize: 12 }}>by {r.requester} · {r.date}</div></div>
+                                    <DBadge color={r.status === "approved" ? "#22d3a6" : r.status === "rejected" ? "#f87171" : "#f5a623"}>{r.status.toUpperCase()}</DBadge>
+                                </div>
+                                <div style={{ fontSize: 13, color: "var(--d-muted)", marginBottom: 12 }}>Qty: <strong style={{ color: "var(--d-text)" }}>{r.qty}</strong> · Cost: <strong style={{ color: "var(--d-green)" }}>{fmt(r.cost)}</strong></div>
+                                {r.status === "pending" && <div style={{ display: "flex", gap: 10 }}>
+                                    <button className="btn btn-success-d btn-sm" onClick={() => approve(r.id)}>✓ Approve</button>
+                                    <button className="btn btn-danger-d btn-sm" onClick={() => reject(r.id)}>✗ Reject</button>
+                                </div>}
+                            </div>
+                        ))}
+                    </div>}
+                </DashLayoutD>
+            );
+        }
+
+        // ── Owner full layout ──
+        function OwnerFullDash({ state, update, user, onExit }) {
+            const [tab, setTab] = useState("overview");
+            const totalSales = state.sales.reduce((s, b) => s + b.total, 0);
+            const profit = totalSales * 0.38;
+            const lowStock = state.medicines.filter(m => m.stock < m.minStock);
+            const expiringSoon = state.medicines.filter(m => daysLeft(m.expiry) <= 60);
+
+            const tabs = [
+                { id: "overview", label: "Overview", icon: "📊", color: "#f5a623" },
+                { id: "sales", label: "Sales", icon: "🧾" },
+                { id: "staff", label: "Staff", icon: "👥" },
+                { id: "inventory", label: "Inventory", icon: "📦" },
+                { id: "orders", label: "Online Orders", icon: "🛒" },
+            ];
+            return (
+                <DashLayoutD color="#f5a623" tabs={tabs} active={tab} onTab={setTab} user={user} onExit={onExit}>
+                    {tab === "overview" && <div className="fade-up">
+                        <DSectionHeader title="Business Overview" />
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 14, marginBottom: 28 }}>
+                            <StatCardD icon="💰" label="Total Revenue" value={fmt(totalSales)} color="#f5a623" />
+                            <StatCardD icon="📈" label="Est. Profit" value={fmt(profit)} color="#22d3a6" />
+                            <StatCardD icon="📦" label="Medicines" value={state.medicines.length} color="#4fa3f7" />
+                            <StatCardD icon="⚠️" label="Low Stock" value={lowStock.length} color="#f87171" />
+                            <StatCardD icon="🕐" label="Expiring ≤60d" value={expiringSoon.length} color="#fb923c" />
+                            <StatCardD icon="🛒" label="Online Orders" value={state.publicOrders?.length || 0} color="#a78bfa" />
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+                            <DCard title="⚠️ Low Stock">
+                                {lowStock.length === 0 ? <DEmpty>All adequate</DEmpty> : lowStock.map(m => (
+                                    <div key={m.id} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid var(--d-border)" }}>
+                                        <span style={{ fontSize: 13, color: "var(--d-text)" }}>{m.name}</span>
+                                        <span style={{ color: "var(--d-red)", fontWeight: 600, fontSize: 12 }}>{m.stock}/{m.minStock}</span>
+                                    </div>
+                                ))}
+                            </DCard>
+                            <DCard title="🕐 Expiring Soon">
+                                {expiringSoon.map(m => {
+                                    const d = daysLeft(m.expiry); return (
+                                        <div key={m.id} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: "1px solid var(--d-border)" }}>
+                                            <span style={{ fontSize: 13, color: "var(--d-text)" }}>{m.name}</span>
+                                            <span style={{ fontWeight: 600, fontSize: 12, color: d <= 30 ? "var(--d-red)" : "var(--d-orange)" }}>{d}d</span>
+                                        </div>
+                                    );
+                                })}
+                            </DCard>
+                        </div>
+                    </div>}
+                    {tab === "sales" && <div className="fade-up">
+                        <DSectionHeader title="Sales History" />
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 14, marginBottom: 24 }}>
+                            <StatCardD icon="🧾" label="Total Bills" value={state.sales.length} color="#f5a623" />
+                            <StatCardD icon="💵" label="Revenue" value={fmt(totalSales)} color="#22d3a6" />
+                            <StatCardD icon="📊" label="Avg Bill" value={fmt(totalSales / state.sales.length || 0)} color="#4fa3f7" />
+                        </div>
+                        <DCard>
+                            <table className="tbl tbl-dark">
+                                <thead><tr><th>Bill #</th><th>Date</th><th>Items</th><th>Cashier</th><th style={{ textAlign: "right" }}>Total</th></tr></thead>
+                                <tbody>
+                                    {[...state.sales].reverse().map(s => (
+                                        <tr key={s.id}>
+                                            <td style={{ color: "var(--d-amber)", fontWeight: 600 }}>#{s.id}</td>
+                                            <td style={{ color: "var(--d-muted)" }}>{s.date}</td>
+                                            <td style={{ color: "var(--d-muted)" }}>{s.items.length} items</td>
+                                            <td style={{ color: "var(--d-muted)" }}>{s.cashier}</td>
+                                            <td style={{ textAlign: "right", color: "var(--d-green)", fontWeight: 600 }}>{fmt(s.total)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </DCard>
+                    </div>}
+                    {tab === "staff" && <div className="fade-up">
+                        <DSectionHeader title="Staff Overview" />
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))", gap: 14 }}>
+                            {USERS.filter(u => u.role !== "owner").map(u => {
+                                const m = ROLE_META[u.role]; const emp = state.employees.find(e => e.name === u.name);
+                                return (
+                                    <div key={u.id} className="card-dark">
+                                        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: `linear-gradient(135deg,${m.color},${m.color}55)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#000" }}>{u.avatar}</div>
+                                            <div><div style={{ fontWeight: 600, color: "var(--d-text)" }}>{u.name}</div><div style={{ color: m.color, fontSize: 11.5 }}>{m.icon} {m.label}</div></div>
+                                        </div>
+                                        {emp && <>
+                                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "6px 0", borderTop: "1px solid var(--d-border)" }}><span style={{ color: "var(--d-muted)" }}>Salary</span><span style={{ fontWeight: 600, color: "var(--d-text)" }}>{fmt(emp.salary)}</span></div>
+                                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "6px 0", borderTop: "1px solid var(--d-border)" }}><span style={{ color: "var(--d-muted)" }}>Payment</span><span style={{ color: emp.paid ? "var(--d-green)" : "var(--d-red)", fontWeight: 600 }}>{emp.paid ? "✓ Paid" : "⏳ Pending"}</span></div>
+                                        </>}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>}
+                    {tab === "inventory" && <div className="fade-up">
+                        <DSectionHeader title="Full Inventory" />
+                        <DCard>
+                            <table className="tbl tbl-dark">
+                                <thead><tr>{["Medicine", "Category", "Stock", "Min", "Sell", "Cost", "Expiry", "Status"].map(h => <th key={h}>{h}</th>)}</tr></thead>
+                                <tbody>
+                                    {state.medicines.map(m => {
+                                        const d = daysLeft(m.expiry); const low = m.stock < m.minStock; return (
+                                            <tr key={m.id}>
+                                                <td style={{ color: "var(--d-text)", fontWeight: 500 }}>{m.name}</td>
+                                                <td style={{ color: "var(--d-muted)" }}>{m.category}</td>
+                                                <td style={{ color: low ? "var(--d-red)" : "var(--d-green)", fontWeight: 600 }}>{m.stock}</td>
+                                                <td style={{ color: "var(--d-muted)" }}>{m.minStock}</td>
+                                                <td style={{ color: "var(--d-text)" }}>{fmt(m.price)}</td>
+                                                <td style={{ color: "var(--d-muted)" }}>{fmt(m.costPrice)}</td>
+                                                <td style={{ color: d <= 60 ? "var(--d-orange)" : "var(--d-muted)" }}>{m.expiry}</td>
+                                                <td>{low && <DBadge color="#f87171">Low</DBadge>}{d <= 60 && <DBadge color="#fb923c">{d}d</DBadge>}{!low && d > 60 && <DBadge color="#22d3a6">OK</DBadge>}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </DCard>
+                    </div>}
+                    {tab === "orders" && <div className="fade-up">
+                        <DSectionHeader title="Online Orders" />
+                        {(state.publicOrders || []).length === 0 ? <DEmpty>No orders yet</DEmpty> : (state.publicOrders || []).slice().reverse().map(o => (
+                            <div key={o.id} className="card-dark" style={{ marginBottom: 12, borderColor: `${o.status === "ready" ? "#22d3a6" : "#f5a623"}22` }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                                    <div><div style={{ fontWeight: 600, color: "var(--d-text)" }}>#{o.id} · {o.customer}</div><div style={{ color: "var(--d-muted)", fontSize: 12 }}>{o.phone} · {o.date}</div></div>
+                                    <DBadge color={o.status === "ready" ? "#22d3a6" : "#f5a623"}>{o.status}</DBadge>
+                                </div>
+                                <div style={{ fontSize: 13, color: "var(--d-muted)", marginBottom: 8 }}>{o.items.map(i => `${i.name}×${i.qty}`).join(" · ")}</div>
+                                <div style={{ color: "var(--d-green)", fontWeight: 700 }}>{fmt(o.total)}</div>
+                            </div>
+                        ))}
+                    </div>}
+                </DashLayoutD>
+            );
+        }
+
+        // ═══════════════════════════ STAFF PORTAL ROUTER ═══════════════════════════
+        function StaffPortal({ state, update, onExit }) {
+            const [staffUser, setStaffUser] = useState(null);
+
+            if (!staffUser) return <StaffLogin onLogin={setStaffUser} />;
+
+            // Wrap each dash so it can exit staff portal
+            const wrapExit = C => <C state={state} update={update} user={staffUser} onExit={() => setStaffUser(null)} />;
+
+            if (staffUser.role === "owner") return <OwnerFullDash state={state} update={update} user={staffUser} onExit={() => setStaffUser(null)} />;
+            if (staffUser.role === "stock") return <StockDash state={state} update={update} user={staffUser} onExit={() => setStaffUser(null)} />;
+            if (staffUser.role === "counter") return <CounterDash state={state} update={update} user={staffUser} onExit={() => setStaffUser(null)} />;
+            if (staffUser.role === "finance") return <FinanceDash state={state} update={update} user={staffUser} onExit={() => setStaffUser(null)} />;
+            return null;
+        }
+
+        // ═══════════════════════════ MAIN PUBLIC APP ═══════════════════════════
+        function App() {
+            const [page, setPage] = useState("home");      // home | order | contact | staff
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            const [state, setState] = useState(globalState);
+
+            const update = patch => { const next = { ...state, ...patch }; globalState = next; setState(next); };
+
+            const placeOrder = orderData => {
+                const id = state.orderIdCounter;
+                update({
+                    publicOrders: [...(state.publicOrders || []), { id, customer: orderData.name, phone: orderData.phone, address: orderData.address, note: orderData.note, items: orderData.items, total: orderData.total, status: "pending", date: today() }],
+                    orderIdCounter: id + 1,
+                });
+                return id;
+            };
+
+            const navigate = p => { setPage(p); setSidebarOpen(false); };
+
+            if (page === "staff") return <StaffPortal state={state} update={update} onExit={() => setPage("home")} />;
+
+            const navItems = [
+                { id: "home", label: "Home", icon: "🏠" },
+                { id: "order", label: "Order Medicines", icon: "💊" },
+                { id: "contact", label: "Contact Us", icon: "📞" },
+            ];
+
+            return (
+                <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
+
+                    {/* SIDEBAR OVERLAY */}
+                    {sidebarOpen && <div className="pub-overlay" onClick={() => setSidebarOpen(false)} />}
+
+                    {/* SIDEBAR */}
+                    <div className={`pub-sidebar${sidebarOpen ? " open" : ""}`}>
+                        {/* Logo */}
+                        <div style={{ padding: "20px 20px 16px", borderBottom: "1px solid var(--border)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <span style={{ fontSize: 24 }}>⚕️</span>
+                                <div>
+                                    <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 17, letterSpacing: "-.5px" }}>MediVault</div>
+                                    <div style={{ color: "var(--muted)", fontSize: 11 }}>Pharmacy</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Nav */}
+                        <div style={{ padding: "12px 12px", flex: 1 }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: ".06em", textTransform: "uppercase", color: "var(--muted)", padding: "0 4px", marginBottom: 8 }}>Menu</div>
+                            {navItems.map(n => (
+                                <button key={n.id} className={`pub-nav-item${page === n.id ? " active" : ""}`} onClick={() => navigate(n.id)}>
+                                    <span style={{ fontSize: 18 }}>{n.icon}</span>{n.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Staff button at bottom */}
+                        <div style={{ padding: "12px 12px 20px", borderTop: "1px solid var(--border)" }}>
+                            <button className="btn" style={{ width: "100%", background: "var(--d-bg)", color: "var(--d-text)", border: "1px solid rgba(255,255,255,.1)", justifyContent: "flex-start", gap: 10, padding: "11px 14px", borderRadius: 10, fontSize: 14 }} onClick={() => navigate("staff")}>
+                                <span style={{ fontSize: 18 }}>🔒</span> Staff Login
+                            </button>
+                            <div style={{ color: "var(--muted)", fontSize: 11, textAlign: "center", marginTop: 10 }}>Internal staff portal access</div>
+                        </div>
+                    </div>
+
+                    {/* TOP NAVBAR */}
+                    <div className="pub-nav">
+                        {/* Hamburger */}
+                        <button onClick={() => setSidebarOpen(o => !o)} style={{ width: 66, height: 66, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5, flexShrink: 0 }}>
+                            {[0, 1, 2].map(i => <div key={i} style={{ width: 22, height: 2, background: "var(--text)", borderRadius: 2, transition: "all .2s", transform: sidebarOpen && i === 0 ? "rotate(45deg) translate(5px,5px)" : sidebarOpen && i === 1 ? "scaleX(0)" : sidebarOpen && i === 2 ? "rotate(-45deg) translate(5px,-5px)" : "none" }} />)}
+                        </button>
+
+                        {/* Brand */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 20 }}>⚕️</span>
+                            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: "-.5px" }}>MediVault</span>
+                            <span style={{ color: "var(--muted)", fontSize: 13, fontWeight: 300 }}>Pharmacy</span>
+                        </div>
+
+                        {/* Right actions */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 16 }}>
+                            {navItems.map(n => (
+                                <button key={n.id} className="btn btn-ghost btn-sm" style={{ display: "none", background: page === n.id ? "var(--primary-bg)" : "", color: page === n.id ? "var(--primary)" : "var(--muted)", border: page === n.id ? "1px solid rgba(14,165,233,.2)" : "1px solid var(--border)" }} onClick={() => navigate(n.id)}>{n.label}</button>
+                            ))}
+                            <button className="btn btn-primary btn-sm" onClick={() => navigate("order")}>Order Medicines</button>
+                        </div>
+                    </div>
+
+                    {/* PAGE CONTENT */}
+                    <div style={{ paddingTop: 66, maxWidth: 1100, margin: "0 auto", padding: "82px 24px 60px" }}>
+                        {page === "home" && <HomePage medicines={state.medicines} onNavigate={navigate} />}
+                        {page === "order" && <PublicOrderPage medicines={state.medicines} onPlaceOrder={placeOrder} />}
+                        {page === "contact" && <ContactPage />}
+                    </div>
+
+                    {/* FOOTER */}
+                    <footer style={{ borderTop: "1px solid var(--border)", padding: "28px 24px", textAlign: "center", color: "var(--muted)", fontSize: 13 }}>
+                        <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, color: "var(--text)" }}>⚕️ MediVault Pharmacy</span>
+                        &nbsp;·&nbsp; 123 Health Street, Colombo 07 &nbsp;·&nbsp; 011 234 5678 &nbsp;·&nbsp; info@medivault.lk
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+    </script>
+</body>
+
+</html>
